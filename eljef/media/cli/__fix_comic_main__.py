@@ -142,7 +142,7 @@ def main(**kwargs) -> None:
     """
     paths = _get_paths(kwargs.get('comic_file'))
     _create_temp(paths)
-    comic.extract(paths.new.file, paths.orig.extracted, debug=kwargs.get('debug'))
+    comic.extract(kwargs.get('comic_file'), paths.orig.extracted, debug=kwargs.get('debug'))
     images = comic.get_images(paths.orig.extracted, filter_images=kwargs.get('img_filter'))
 
     if images.types == 0:
@@ -151,6 +151,9 @@ def main(**kwargs) -> None:
         _clean_exit(paths, "multiple image formats found but not explicitly allowed and conversion not specified")
 
     images = _get_image_list(images, kwargs.get('img_multi'), kwargs.get('copy_only'))
+    if kwargs.get('copy_only') and not images:
+        _clean_exit(paths, f"only {kwargs.get('copy_only')} files were set to be copied, but none were found")
+
     to_compress = comic.copy_images(paths.orig.extracted, paths.new.extracted, images, kwargs.get('img_conv'))
     os.rename(kwargs.get('comic_file'), paths.orig.file)
     to_compress = comic.copy_info(paths.orig.info, paths.new.info, paths.no_info, paths.new.extracted, to_compress)
