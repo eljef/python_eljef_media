@@ -1,0 +1,17 @@
+# Library dependencies
+# pip install -r requirements.txt
+
+#### Required for operation ####
+git+https://git.eljef.me/python/eljef_core.git@1.4.1#egg=eljef-core
+Pillow
+
+#### Needed for linting ####
+flake8
+pylint
+
+#### Needed for testing ####
+pytest
+pytest-pythonpath # so tests can be run from the separated tests directory
+
+#### Needed for testing coverage ****
+pytest-cov

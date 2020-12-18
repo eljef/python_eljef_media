@@ -1,0 +1,8 @@
+* text eol=lf
+.gitattributes
+*.gitattributes text
+.gitignore
+*.gitignore text
+
+*.py text diff=python
+*.rst text
