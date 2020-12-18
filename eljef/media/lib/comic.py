@@ -134,7 +134,7 @@ def copy_info(orig_info: str, new_info: str, no_info: str, new_base: str, pages:
 
     fops.file_write_convert(new_info, fops.XML, comic_info_data)
 
-    return pages + [new_info]
+    return pages + [COMIC_INFO_XML]
 
 
 def extract(comic: str, path: str, debug: bool = False) -> None:
