@@ -84,7 +84,7 @@ def copy_images(orig_path: str, new_path: str, images: list, convert_to: str) ->
     current_page = 0
     new_images = []
 
-    for file in images:
+    for file in sorted(images):
         new_file = f"P{current_page:05d}.{new_ext}"
         LOGGER.debug("%s -> %s", file, new_file)
         if not convert_to:
