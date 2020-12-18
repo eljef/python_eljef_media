@@ -61,7 +61,7 @@ def compress(comic_book: str, extracted_path: str, file_list: list) -> None:
     """
     with fops.pushd(extracted_path):
         with zipfile.ZipFile(comic_book, 'w', compression=zipfile.ZIP_STORED) as zip_file:
-            for file in file_list:
+            for file in sorted(file_list):
                 zip_file.write(file)
 
 
