@@ -77,21 +77,24 @@ def _create_temp(paths: _Paths) -> None:
     os.makedirs(paths.orig.extracted)
 
 
-def _get_image_list(images: comic.Images, allow_multi: bool) -> list:
+def _get_image_list(images: comic.Images, allow_multi: bool, copy_only: str) -> list:
     """Returns a list of images to be copied.
 
     Args:
         images: comic.Images object containing paths to images to be copied.
         allow_multi: Allow multiple image formats.
+        copy_only: Copy only images of the specified format.
     """
     if allow_multi:
-        return images.jpeg + images.png + images.webp
+        return images.jpg + images.png + images.webp
+    if copy_only:
+        return getattr(images, copy_only)
     if len(images.webp) > 0:
         return images.webp
     if len(images.png) > 0:
         return images.png
 
-    return images.jpeg
+    return images.jpg
 
 
 def _get_paths(comic_file: str) -> _Paths:
@@ -131,6 +134,7 @@ def main(**kwargs) -> None:
     Keyword Args:
         comic_file (str): Full path to comic book file.
         debug (bool): If True, enables debug output.
+        copy_only (str): If set, copy only images of the specified type.
         img_conv (str): If set, convert images to specified type.
         img_filter (bool): If True, filters out images files that do not contain a page number.
         img_multi (bool): If True, allow multiple image formats in comic book file.
@@ -142,10 +146,10 @@ def main(**kwargs) -> None:
 
     if images.types == 0:
         _clean_exit(paths, "no image files found")
-    if images.types > 1 and not kwargs.get('img_conv') and not kwargs.get('img_multi'):
+    if images.types > 1 and not kwargs.get('copy_only') and not kwargs.get('img_conv') and not kwargs.get('img_multi'):
         _clean_exit(paths, "multiple image formats found but not explicitly allowed and conversion not specified")
 
-    images = _get_image_list(images, kwargs.get('img_multi'))
+    images = _get_image_list(images, kwargs.get('img_multi'), kwargs.get('copy_only'))
     to_compress = comic.copy_images(paths.orig.extracted, paths.new.extracted, images, kwargs.get('img_conv'))
     os.rename(kwargs.get('comic_file'), paths.orig.file)
     to_compress = comic.copy_info(paths.orig.info, paths.new.info, paths.no_info, paths.new.extracted, to_compress)
@@ -171,6 +175,7 @@ def cli_main() -> None:
     LOGGER.info(" -- Processing %s", comic_file)
 
     main(comic_file=comic_file,
+         copy_only=args.copy_only,
          debug=args.debug_log,
          img_conv=args.images_format,
          img_filter=args.filter_pages,

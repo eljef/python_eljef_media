@@ -37,7 +37,7 @@ LOGGER = logging.getLogger(__name__)
 COMIC_INFO_XML = 'ComicInfo.xml'
 """Name of the Metadata XML file for a comic book."""
 
-Images = namedtuple('Images', 'jpeg png webp types')
+Images = namedtuple('Images', 'jpg png webp types')
 """Images holds relative paths to image files found in a comic archive
 
 Attributes:
@@ -196,7 +196,9 @@ def get_images(path: str, filter_images: bool) -> Images:
     jpeg += fops.list_files_by_extension(path, 'jpeg')
     jpeg += fops.list_files_by_extension(path, 'JPEG')
     png = fops.list_files_by_extension(path, 'png')
+    png += fops.list_files_by_extension(path, 'PNG')
     webp = fops.list_files_by_extension(path, 'webp')
+    webp += fops.list_files_by_extension(path, 'WEBP')
     types = 0
 
     if len(jpeg) > 0:
