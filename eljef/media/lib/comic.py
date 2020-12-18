@@ -128,7 +128,7 @@ def copy_info(orig_info: str, new_info: str, no_info: str, new_base: str, pages:
             comic_info_pages_page.append(page_info)
             page_count += 1
 
-        comic_info_pages_page[0]['Type'] = 'FrontCover'
+        comic_info_pages_page[0]['@Type'] = 'FrontCover'
         comic_info_data['ComicInfo']['Pages'] = OrderedDict()
         comic_info_data['ComicInfo']['Pages']['Page'] = comic_info_pages_page
 
