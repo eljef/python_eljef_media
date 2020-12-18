@@ -63,7 +63,8 @@ def _clean_exit(paths: _Paths, exit_str: str = None) -> None:
     """
     fops.delete(paths.temp)
     if exit_str:
-        raise SystemExit(exit_str)
+        LOGGER.error(exit_str)
+        raise SystemExit(1)
 
 
 def _create_temp(paths: _Paths) -> None:
