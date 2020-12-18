@@ -89,9 +89,14 @@ def copy_images(orig_path: str, new_path: str, images: list, convert_to: str) ->
         LOGGER.debug("%s -> %s", file, new_file)
         if not convert_to:
             shutil.copyfile(os.path.join(orig_path, file), os.path.join(new_path, new_file))
+        elif new_ext == 'jpg':
+            with Image.open(fr'{os.path.join(orig_path, file)}') as image_file:
+                out_file = image_file.convert('RGB')
+                out_file.save(fr'{os.path.join(new_path, new_file)}')
+                out_file.close()
         else:
-            image_file = Image.open(fr'{os.path.join(orig_path, file)}')
-            image_file.save(fr'{os.path.join(new_path, new_file)}')
+            with Image.open(fr'{os.path.join(orig_path, file)}') as image_file:
+                image_file.save(fr'{os.path.join(new_path, new_file)}')
 
         new_images.append(new_file)
         current_page += 1
