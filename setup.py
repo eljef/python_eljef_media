@@ -7,7 +7,7 @@ setup(
     author='Jef Oliver',
     author_email='jef@eljef.me',
     description='Various media utilities written by Jef Oliver',
-    install_requires=['eljef-core>=1.4.1', 'Pillow'],
+    install_requires=['eljef-core>=1.5.0', 'Pillow'],
     license='LGPLv2.1',
     name='eljef_media',
     packages=['eljef.media', 'eljef.media.cli', 'eljef.media.lib'],
