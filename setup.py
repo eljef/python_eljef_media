@@ -7,7 +7,7 @@ setup(
     author='Jef Oliver',
     author_email='jef@eljef.me',
     description='Various media utilities written by Jef Oliver',
-    install_requires=['eljef-core>=1.5.0', 'Pillow'],
+    install_requires=['eljef-core>=1.6.0', 'eyed3', 'Pillow'],
     license='LGPLv2.1',
     name='eljef_media',
     packages=['eljef.media', 'eljef.media.cli', 'eljef.media.lib'],
@@ -17,7 +17,8 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'fix-comic = eljef.media.cli.__fix_comic_main__:cli_main'
+            'fix-comic = eljef.media.cli.__fix_comic_main__:cli_main',
+            'fix-mp3s = eljef.media.cli.__fix_mp3_main__:cli_main'
         ]
     },
 )

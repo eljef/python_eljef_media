@@ -2,7 +2,8 @@
 # pip install -r requirements.txt
 
 #### Required for operation ####
-git+https://git.eljef.me/python/eljef_core.git@1.5.0#egg=eljef-core
+eyed3
+git+https://git.eljef.me/python/eljef_core.git@1.6.0#egg=eljef-core
 Pillow
 
 #### Needed for linting ####

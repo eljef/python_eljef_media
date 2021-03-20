@@ -28,6 +28,7 @@ build:
 clean:
 	rm -rf build dist eljef_media.egg-info \
 		eljef/__pycache__ eljef/media/__pycache__ \
+		eljef/media/cli/__pycache__ eljef/media/lib/__pycache__ \
 		tests/__pycache__ tests/_trial_temp \
 		.pytest_cache .coverage
 
