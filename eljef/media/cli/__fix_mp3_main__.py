@@ -181,7 +181,7 @@ def cli_main() -> None:
     if args.version_out:
         cli.print_version(NAME, VERSION)
 
-    applog.setup_app_logging(args.debug_log)
+    applog.setup_app_logging(args.debug_log, args.log_file)
 
     if args.max_image_height < 1:
         raise ValueError("Max image height must be greater than 0. Specified %d" % args.max_image_height)
