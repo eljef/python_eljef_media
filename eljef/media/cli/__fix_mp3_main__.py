@@ -135,6 +135,7 @@ def _main_process_mp3_dir(base: str, path: str, image_height: int, target_volume
         _main_process_mp3_dir_mp3s(mp3_list, cover_image, target_volume, debug)
         _main_process_mp3_dir_finish()
         if beets:
+            LOGGER.info(" ** beet replaygain %s", nfo_data.get('album').get('title'))
             mp3.beet_replaygain_album(nfo_data.get('album').get('title'), debug)
 
 
@@ -163,6 +164,7 @@ def main(**kwargs) -> None:
                               beets=beets, debug=debug, ignore_folder=ignore_folder)
 
     if beets:
+        LOGGER.info(" ** beet up")
         mp3.beet_up(debug)
 
 
