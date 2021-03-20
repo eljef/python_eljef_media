@@ -28,6 +28,7 @@ from eljef.media.lib import (mp3, image)
 
 LOGGER = logging.getLogger()
 
+__ALBUM_NFO = 'album.nfo'
 __REQUIRED_EXECS = ['mp3gain']
 __REQUIRED_EXECS_BEETS = ['beet']
 
@@ -49,10 +50,15 @@ def _main_get_mp3_dirs(path: str) -> set:
     return mp3dirs
 
 
-def _main_process_mp3_dir_finish() -> None:
-    """Copies cover.jpg to folder.jpg, signaling that this directory has been processed."""
+def _main_process_mp3_dir_finish(nfo_data: dict) -> None:
+    """Copies cover.jpg to folder.jpg, and saves album.nfo
+
+    Args:
+        nfo_data: dictionary of NFO data to save to album.nfo
+    """
     LOGGER.info(" ** cover.jpg -> folder.jpg")
     shutil.copyfile("cover.jpg", 'folder.jpg')
+    fops.file_write_convert(__ALBUM_NFO, fops.XML, nfo_data)
 
 
 def _main_process_mp3_dir_images(cover_image: str, folder_image: str, discart_image: str, image_height: int) -> None:
@@ -133,7 +139,7 @@ def _main_process_mp3_dir(base: str, path: str, image_height: int, target_volume
     with fops.pushd(full_path):
         _main_process_mp3_dir_images(cover_image, folder_image, discart_image, image_height)
         _main_process_mp3_dir_mp3s(mp3_list, cover_image, target_volume, debug)
-        _main_process_mp3_dir_finish()
+        _main_process_mp3_dir_finish(nfo_data)
         if beets:
             LOGGER.info(" ** beet replaygain %s", nfo_data.get('album').get('title'))
             mp3.beet_replaygain_album(nfo_data.get('album').get('title'), debug)
