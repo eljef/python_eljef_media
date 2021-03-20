@@ -13,7 +13,7 @@ setup(
     packages=['eljef.media', 'eljef.media.cli', 'eljef.media.lib'],
     python_requires='>=3.8',
     url='https://github.com/eljef/python_eljef_media',
-    version='0.1.1',
+    version='0.1.2',
     zip_safe=False,
     entry_points={
         'console_scripts': [
