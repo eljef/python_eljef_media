@@ -126,14 +126,15 @@ def album_nfo_from_file(path: str) -> dict:
     return _album_nfo_from_file_mb_tags(path, mp3.tag, ret)
 
 
-def beet_replaygain_album(album: str, debug: bool) -> None:
+def beet_replaygain_album(artist: str, album: str, debug: bool) -> None:
     """Run 'beet replaygain' on an Album.
 
     Args:
+        artist: Name of artist to run 'beet replaygain' on.
         album: Name of album to run 'beet replaygain' on.
         debug: Print debug output.
     """
-    full_cmd = __CMD_BEET_REPLAYGAIN + [album]
+    full_cmd = __CMD_BEET_REPLAYGAIN + [artist, album]
 
     LOGGER.debug(' '.join(full_cmd))
     try:
