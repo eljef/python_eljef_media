@@ -209,16 +209,16 @@ def _replaygain_calc(mp3s: list, target_gain: float) -> Tuple[dict, rgcalc.GainD
     exc_slot = [None]
 
     # Handlers
-    def on_loop_finished(*args):  # pylint: disable=unused-argument
+    def on_loop_finished(evsrc, trackdata, albumdata):  # pylint: disable=unused-argument
         loop.quit()
 
-    def on_track_started(*_, filename):
+    def on_track_started(evsrc, filename):  # pylint: disable=unused-argument
         LOGGER.debug(" ** replaygain started: %s", filename)
 
-    def on_track_finished(*args):
-        LOGGER.debug(" ** replaygain stopped: %s", args[1])
+    def on_track_finished(evsrc, filename, gaindata):  # pylint: disable=unused-argument
+        LOGGER.debug(" ** replaygain stopped: %s", filename)
 
-    def on_error(*_, exc):
+    def on_error(evsrc, exc):  # pylint: disable=unused-argument
         exc_slot[0] = exc
         loop.quit()
 
