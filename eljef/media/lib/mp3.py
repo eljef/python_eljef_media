@@ -25,6 +25,7 @@ from typing import Tuple
 import mutagen
 import mutagen.id3
 
+# noinspection PyPackageRequirements,PyUnresolvedReferences
 from gi.repository import GLib
 from rgain3 import (rgcalc, rgio, util)
 
@@ -209,15 +210,19 @@ def _replaygain_calc(mp3s: list, target_gain: float) -> Tuple[dict, rgcalc.GainD
     exc_slot = [None]
 
     # Handlers
+    # noinspection PyUnusedLocal
     def on_loop_finished(evsrc, trackdata, albumdata):  # pylint: disable=unused-argument
         loop.quit()
 
+    # noinspection PyUnusedLocal
     def on_track_started(evsrc, filename):  # pylint: disable=unused-argument
         LOGGER.debug(" ** replaygain started: %s", filename)
 
+    # noinspection PyUnusedLocal
     def on_track_finished(evsrc, filename, gaindata):  # pylint: disable=unused-argument
         LOGGER.debug(" ** replaygain stopped: %s", filename)
 
+    # noinspection PyUnusedLocal
     def on_error(evsrc, exc):  # pylint: disable=unused-argument
         exc_slot[0] = exc
         loop.quit()

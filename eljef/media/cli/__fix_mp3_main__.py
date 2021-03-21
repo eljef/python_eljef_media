@@ -26,6 +26,7 @@ from eljef.media.cli.__fix_mp3_args__ import CMD_LINE_ARGS
 from eljef.media.cli.__fix_mp3_vars__ import (DESCRIPTION, NAME)
 from eljef.media.lib import (mp3, image)
 
+# noinspection PyPackageRequirements
 # pylint: disable=wrong-import-position,wrong-import-order
 import gi
 gi.require_version("Gst", "1.0")
