@@ -97,14 +97,22 @@ def _main_process_mp3_dir_mp3s(mp3_list: list, cover_image: str, target_volume: 
         target_volume: Volume, in decibels, mp3gain should adjust a track to.
         debug: Enable debug logging when True
     """
+    LOGGER.info(" ** Removing previous replaygain tags and APE tags")
+    for mp3_file in mp3_list:
+        mp3.remove_ape_tags(mp3_file)
+        mp3.remove_replaygain_tags(mp3_file)
+
     LOGGER.info(" ** Calculating gain with mp3gain")
     mp3.mp3gain(mp3_list, target_volume, debug)
+
     LOGGER.info(" ** Calculating replaygain")
     mp3.replaygain(mp3_list, target_volume)
 
-    for mp3_file in sorted(mp3_list):
-        LOGGER.info(" ** %s", mp3_file)
+    LOGGER.info(" ** Correcting tags")
+    for mp3_file in mp3_list:
+        mp3.remove_ape_tags(mp3_file)
         mp3.fix_cover_tag(mp3_file, cover_image)
+        mp3.correct_replaygain_tags(mp3_file)
 
 
 def _main_process_mp3_dir(base: str, path: str, image_height: int, target_volume: float, **kwargs) -> None:

@@ -23,6 +23,7 @@ import mimetypes
 from typing import Tuple
 
 import mutagen
+import mutagen.apev2
 import mutagen.id3
 
 # noinspection PyPackageRequirements,PyUnresolvedReferences
@@ -47,6 +48,14 @@ __FID_MB_ALBUM_TYPE = 'TXXX:MusicBrainz Album Type'
 __FID_MB_ARTIST_ID = 'TXXX:MusicBrainz Artist Id'
 __FID_MB_RELEASE_GROUP_ID = 'TXXX:MusicBrainz Release Group Id'
 __FID_PUBLISHER = 'TPUB'
+__FID_RELATIVE_VOLUME_ALBUM = 'RVA2:album'
+__FID_RELATIVE_VOLUME_TRACK = 'RVA2:track'
+__FID_REPLAYGAIN_ALBUM_GAIN = 'TXXX:REPLAYGAIN_ALBUM_GAIN'
+__FID_REPLAYGAIN_ALBUM_PEAK = 'TXXX:REPLAYGAIN_ALBUM_PEAK'
+__FID_REPLAYGAIN_Q_REF_LOUD = 'TXXX:QuodLibet::replaygain_reference_loudness'
+__FID_REPLAYGAIN_REF_LOUD = 'TXXX:replaygain_reference_loudness'
+__FID_REPLAYGAIN_TRACK_GAIN = 'TXXX:REPLAYGAIN_TRACK_GAIN'
+__FID_REPLAYGAIN_TRACK_PEAK = 'TXXX:REPLAYGAIN_TRACK_PEAK'
 
 __XML_ID_ALBUM = 'album'
 __XML_ID_ALBUM_ARTIST_CREDITS = 'albumArtistCredits'
@@ -60,6 +69,14 @@ __XML_ID_LABEL = 'label'
 __XML_ID_RELEASE_DATE = 'releasedate'
 __XML_ID_SCRAPEDMBID = 'scrapedmbid'
 __XML_ID_TITLE = 'title'
+
+__REPLAYGAIN_FRAMES_FOR_COMP = (__FID_RELATIVE_VOLUME_ALBUM.lower(), __FID_RELATIVE_VOLUME_TRACK.lower(),
+                                __FID_REPLAYGAIN_ALBUM_GAIN.lower(), __FID_REPLAYGAIN_ALBUM_PEAK.lower(),
+                                __FID_REPLAYGAIN_Q_REF_LOUD.lower(), __FID_REPLAYGAIN_REF_LOUD.lower(),
+                                __FID_REPLAYGAIN_TRACK_GAIN.lower(), __FID_REPLAYGAIN_TRACK_PEAK.lower())
+
+__REPLAYGAIN_FRAMES_FOR_CASE = (__FID_REPLAYGAIN_ALBUM_GAIN, __FID_REPLAYGAIN_ALBUM_PEAK, __FID_REPLAYGAIN_TRACK_GAIN,
+                                __FID_REPLAYGAIN_TRACK_PEAK)
 
 
 def _album_nfo_from_file_date_tags(path: str, tag_data: mutagen.id3.ID3) -> str:
@@ -141,6 +158,30 @@ def album_nfo_from_file(path: str) -> dict:
     return _album_nfo_from_file_mb_tags(path, mp3.tags, ret)
 
 
+def correct_replaygain_tags(path: str) -> None:
+    """Make sure replaygain tags are upper case.
+
+    TXXX tags are supposed to be case insensitive. Some players suck and only
+    read upper case tags.
+
+    Args:
+        path: path to mp3 file to correct tags for.
+    """
+    to_correct = []
+
+    mp3 = mutagen.File(path)
+    for key in mp3.tags.keys():
+        if key.upper() in __REPLAYGAIN_FRAMES_FOR_CASE:
+            to_correct.append(key)
+
+    for key in to_correct:
+        data = mp3.tags[key]
+        del mp3.tags[key]
+        mp3.tags[key.upper()] = data
+
+    mp3.save()
+
+
 def fix_cover_tag(path: str, cover_image: str) -> None:
     """Replaces the cover image in the ID3 tag for an MP3.
 
@@ -196,6 +237,39 @@ def mp3gain(mp3s: list, target_gain: float, debug: bool) -> None:
         elif error.stdout:
             LOGGER.error(error.stdout)
         raise
+
+
+def remove_ape_tags(path: str) -> None:
+    """Removes APE tags fro the MP3 file.
+
+    Args:
+        path: path to MP3 file to remove tags from
+    """
+    try:
+        ape = mutagen.apev2.APEv2(path)
+        ape.delete()
+        ape.save()
+    except mutagen.apev2.APENoHeaderError:
+        pass
+
+
+def remove_replaygain_tags(path: str) -> None:
+    """Removes all previously stored replaygain tags.
+
+    Args:
+        path: path to mp3 file to remove tags from
+    """
+    to_remove = []
+
+    mp3 = mutagen.File(path)
+    for key in mp3.tags.keys():
+        if key.lower() in __REPLAYGAIN_FRAMES_FOR_COMP:
+            to_remove.append(key)
+
+    for key in to_remove:
+        del mp3.tags[key]
+
+    mp3.save()
 
 
 def _replaygain_calc(mp3s: list, target_gain: float) -> Tuple[dict, rgcalc.GainData]:
