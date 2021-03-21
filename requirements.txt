@@ -2,9 +2,10 @@
 # pip install -r requirements.txt
 
 #### Required for operation ####
-eyed3
 git+https://git.eljef.me/python/eljef_core.git@1.6.0#egg=eljef-core
+mutagen
 Pillow
+rgain3
 
 #### Needed for linting ####
 flake8
