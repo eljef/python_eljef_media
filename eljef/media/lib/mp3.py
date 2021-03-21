@@ -176,6 +176,7 @@ def correct_replaygain_tags(path: str) -> None:
 
     for key in to_correct:
         data = mp3.tags[key]
+        data.desc = data.desc.upper()
         del mp3.tags[key]
         mp3.tags[key.upper()] = data
 
