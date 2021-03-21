@@ -64,6 +64,8 @@ def _main_process_mp3_dir_finish(nfo_data: dict) -> None:
     """
     LOGGER.info(" ** cover.jpg -> folder.jpg")
     shutil.copyfile("cover.jpg", 'folder.jpg')
+
+    LOGGER.info(" ** album.nfo")
     fops.file_write_convert(__ALBUM_NFO, fops.XML, nfo_data)
 
 
