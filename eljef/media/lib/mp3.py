@@ -157,7 +157,8 @@ def fix_cover_tag(path: str, cover_image: str) -> None:
     LOGGER.debug(" ** %s - Adding front cover image", path)
     mime_type = mimetypes.guess_type(cover_image)[0]
     with open(fr'{cover_image}', 'rb') as cover_rb:
-        mp3_data.tags.add(mime=mime_type, type=mutagen.id3.PictureType.COVER_FRONT, data=cover_rb.read())
+        mp3_data.tags.add(mutagen.id3.APIC(mime=mime_type, type=mutagen.id3.PictureType.COVER_FRONT,
+                                           data=cover_rb.read()))
 
     mp3_data.tags.update_to_v24()
     mp3_data.save()
