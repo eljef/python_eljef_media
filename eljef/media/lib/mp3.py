@@ -173,7 +173,7 @@ def correct_replaygain_tags(path: str) -> None:
 
     mp3 = mutagen.File(path)
     for key in mp3.tags.keys():
-        if key.lower()() in __REPLAYGAIN_FRAMES_FOR_CASE:
+        if key.lower() in __REPLAYGAIN_FRAMES_FOR_CASE:
             to_correct.append(key)
 
     for key in to_correct:
