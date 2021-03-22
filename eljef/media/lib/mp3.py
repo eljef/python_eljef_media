@@ -50,12 +50,12 @@ __FID_MB_RELEASE_GROUP_ID = 'TXXX:MusicBrainz Release Group Id'
 __FID_PUBLISHER = 'TPUB'
 __FID_RELATIVE_VOLUME_ALBUM = 'RVA2:album'
 __FID_RELATIVE_VOLUME_TRACK = 'RVA2:track'
-__FID_REPLAYGAIN_ALBUM_GAIN = 'TXXX:REPLAYGAIN_ALBUM_GAIN'
-__FID_REPLAYGAIN_ALBUM_PEAK = 'TXXX:REPLAYGAIN_ALBUM_PEAK'
+__FID_REPLAYGAIN_ALBUM_GAIN = 'TXXX:replaygain_album_gain'
+__FID_REPLAYGAIN_ALBUM_PEAK = 'TXXX:replaygain_album_peak'
 __FID_REPLAYGAIN_Q_REF_LOUD = 'TXXX:QuodLibet::replaygain_reference_loudness'
 __FID_REPLAYGAIN_REF_LOUD = 'TXXX:replaygain_reference_loudness'
-__FID_REPLAYGAIN_TRACK_GAIN = 'TXXX:REPLAYGAIN_TRACK_GAIN'
-__FID_REPLAYGAIN_TRACK_PEAK = 'TXXX:REPLAYGAIN_TRACK_PEAK'
+__FID_REPLAYGAIN_TRACK_GAIN = 'TXXX:replaygain_track_gain'
+__FID_REPLAYGAIN_TRACK_PEAK = 'TXXX:replaygain_track_peak'
 
 __XML_ID_ALBUM = 'album'
 __XML_ID_ALBUM_ARTIST_CREDITS = 'albumArtistCredits'
@@ -75,8 +75,8 @@ __REPLAYGAIN_FRAMES_FOR_COMP = (__FID_RELATIVE_VOLUME_ALBUM.lower(), __FID_RELAT
                                 __FID_REPLAYGAIN_Q_REF_LOUD.lower(), __FID_REPLAYGAIN_REF_LOUD.lower(),
                                 __FID_REPLAYGAIN_TRACK_GAIN.lower(), __FID_REPLAYGAIN_TRACK_PEAK.lower())
 
-__REPLAYGAIN_FRAMES_FOR_CASE = (__FID_REPLAYGAIN_ALBUM_GAIN, __FID_REPLAYGAIN_ALBUM_PEAK, __FID_REPLAYGAIN_TRACK_GAIN,
-                                __FID_REPLAYGAIN_TRACK_PEAK)
+__REPLAYGAIN_FRAMES_FOR_CASE = (__FID_REPLAYGAIN_ALBUM_GAIN.lower(), __FID_REPLAYGAIN_ALBUM_PEAK.lower(),
+                                __FID_REPLAYGAIN_TRACK_GAIN.lower(), __FID_REPLAYGAIN_TRACK_PEAK.lower())
 
 
 def _album_nfo_from_file_date_tags(path: str, tag_data: mutagen.id3.ID3) -> str:
@@ -159,10 +159,12 @@ def album_nfo_from_file(path: str) -> dict:
 
 
 def correct_replaygain_tags(path: str) -> None:
-    """Make sure replaygain tags are upper case.
+    """Make sure replaygain tags are lower case.
 
-    TXXX tags are supposed to be case insensitive. Some players suck and only
-    read upper case tags.
+    TXXX tags are not supposed to be case insensitive. Some players suck and
+    only read upper or lower case tags. Instead of forcing everything to upper,
+    force everything to lower and check for upper case tags from players and
+    report bugs to them.
 
     Args:
         path: path to mp3 file to correct tags for.
@@ -171,14 +173,16 @@ def correct_replaygain_tags(path: str) -> None:
 
     mp3 = mutagen.File(path)
     for key in mp3.tags.keys():
-        if key.upper() in __REPLAYGAIN_FRAMES_FOR_CASE:
+        if key.lower()() in __REPLAYGAIN_FRAMES_FOR_CASE:
             to_correct.append(key)
 
     for key in to_correct:
         data = mp3.tags[key]
-        data.desc = data.desc.upper()
+        data.desc = data.desc.lower()
         del mp3.tags[key]
-        mp3.tags[key.upper()] = data
+        field_id, desc = key.split(":")
+        new_key = f"{field_id.upper()}:{desc.lower()}"
+        mp3.tags[new_key] = data
 
     mp3.save()
 
