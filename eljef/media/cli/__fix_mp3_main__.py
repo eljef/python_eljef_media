@@ -155,8 +155,9 @@ def _main_process_mp3_dir(base: str, path: str, image_height: int, target_volume
     LOGGER.info("Processing: %s/%s", nfo_data.get('album').get('artistdesc'), nfo_data.get('album').get('title'))
 
     if kwargs.get('tags_only'):
-        _main_process_mp3_dir_mp3s_tags_only(mp3_list)
-        return
+        with fops.pushd(full_path):
+            _main_process_mp3_dir_mp3s_tags_only(mp3_list)
+            return
 
     folder_image = image.image_find(full_path, 'folder')
 
