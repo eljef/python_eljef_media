@@ -90,6 +90,18 @@ def _main_process_mp3_dir_images(cover_image: str, folder_image: str, discart_im
             fops.delete(discart_image)
 
 
+def _main_process_mp3_dir_mp3s_tags_only(mp3_list: list) -> None:
+    """Process only the tags on individual MP3s
+
+    Args:
+        mp3_list: List of MP3 files to process
+    """
+    LOGGER.info(" ** Correcting tags")
+    for mp3_file in mp3_list:
+        mp3.remove_ape_tags(mp3_file)
+        mp3.correct_replaygain_tags(mp3_file)
+
+
 def _main_process_mp3_dir_mp3s(mp3_list: list, cover_image: str, target_volume: float, debug: bool) -> None:
     """Process individual MP3s
 
@@ -129,6 +141,7 @@ def _main_process_mp3_dir(base: str, path: str, image_height: int, target_volume
     Keyword Args:
         debug (bool): Enable debug logging when True
         ignore_folder (bool): Ignore the presence of folder.jpg
+        tags_only (bool): Only correct tags on MP3 files
     """
     debug = kwargs.get('debug', False)
     ignore_folder = kwargs.get('ignore_folder', False)
@@ -138,9 +151,14 @@ def _main_process_mp3_dir(base: str, path: str, image_height: int, target_volume
 
     mp3_list = fops.list_files_by_extension(full_path, 'mp3')
     nfo_data = mp3.album_nfo_from_file(os.path.join(full_path, mp3_list[0]))
-    folder_image = image.image_find(full_path, 'folder')
 
     LOGGER.info("Processing: %s/%s", nfo_data.get('album').get('artistdesc'), nfo_data.get('album').get('title'))
+
+    if kwargs.get('tags_only'):
+        _main_process_mp3_dir_mp3s_tags_only(mp3_list)
+        return
+
+    folder_image = image.image_find(full_path, 'folder')
 
     if folder_image and not ignore_folder:
         LOGGER.warning(" ** %s found: Skipping because already processed", folder_image)
@@ -167,6 +185,7 @@ def main(**kwargs) -> None:
         directory (str): Path to directory to process.
         ignore_folder (bool): Ignore the existence of folder.jpg
         image_height (int): Max image height for resized images.
+        tags_only (bool): Only correct the tags on MP3 files.
         target_volume (float): Target volume for mp3 files via mp3gain.
     """
     debug = kwargs.get('debug')
@@ -180,7 +199,7 @@ def main(**kwargs) -> None:
     mp3dirs = _main_get_mp3_dirs(directory)
     for dir_to_process in sorted(mp3dirs):
         _main_process_mp3_dir(directory, dir_to_process, image_height, target_volume,
-                              debug=debug, ignore_folder=ignore_folder)
+                              debug=debug, ignore_folder=ignore_folder, tags_only=kwargs.get('tags_only'))
 
 
 def cli_main() -> None:
@@ -209,7 +228,7 @@ def cli_main() -> None:
 
     LOGGER.info("Processing: %s", args.mp3_directory)
     main(debug=args.debug_log, directory=dir_to_process, ignore_folder=args.ignore_folder,
-         image_height=args.max_image_height, target_volume=args.target_volume)
+         image_height=args.max_image_height, tags_only=args.tags_only, target_volume=args.target_volume)
 
 
 if __name__ == '__main__':

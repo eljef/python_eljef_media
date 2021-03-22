@@ -21,6 +21,8 @@ from eljef.core import cli
 CMD_LINE_ARGS = [
     cli.Arg(['-v', '--version'], {'dest': 'version_out', 'action': 'store_true', 'help': 'Print version and exit.'}),
     cli.Arg(['--debug'], {'dest': 'debug_log', 'action': 'store_true', 'help': 'Enable debug output.'}),
+    cli.Arg(['-c', '--correct-tags-only'], {'dest': 'tags_only', 'action': 'store_true',
+                                            'help': 'Only correct tags on files.'}),
     cli.Arg(['-d', '--directory'], {'dest': 'mp3_directory', 'metavar': 'Artist', 'required': True,
                                     'help': 'Path to artist directory containing MP3 files.'}),
     cli.Arg(['-i', '--ignore-folder'], {'dest': 'ignore_folder', 'action': 'store_true',
