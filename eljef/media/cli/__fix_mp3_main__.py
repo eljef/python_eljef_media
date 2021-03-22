@@ -62,10 +62,10 @@ def _main_process_mp3_dir_finish(nfo_data: dict) -> None:
     Args:
         nfo_data: dictionary of NFO data to save to album.nfo
     """
-    LOGGER.info(" ** cover.jpg -> folder.jpg")
+    LOGGER.info("   ** cover.jpg -> folder.jpg")
     shutil.copyfile("cover.jpg", 'folder.jpg')
 
-    LOGGER.info(" ** album.nfo")
+    LOGGER.info("   ** album.nfo")
     fops.file_write_convert(__ALBUM_NFO, fops.XML, nfo_data)
 
 
@@ -96,7 +96,7 @@ def _main_process_mp3_dir_mp3s_tags_only(mp3_list: list) -> None:
     Args:
         mp3_list: List of MP3 files to process
     """
-    LOGGER.info(" ** Correcting tags")
+    LOGGER.info("   ** Correcting tags")
     for mp3_file in mp3_list:
         mp3.remove_ape_tags(mp3_file)
         mp3.correct_replaygain_tags(mp3_file)
@@ -111,18 +111,18 @@ def _main_process_mp3_dir_mp3s(mp3_list: list, cover_image: str, target_volume: 
         target_volume: Volume, in decibels, mp3gain should adjust a track to.
         debug: Enable debug logging when True
     """
-    LOGGER.info(" ** Removing previous replaygain tags and APE tags")
+    LOGGER.info("  ** Removing previous replaygain tags and APE tags")
     for mp3_file in mp3_list:
         mp3.remove_ape_tags(mp3_file)
         mp3.remove_replaygain_tags(mp3_file)
 
-    LOGGER.info(" ** Calculating gain with mp3gain")
+    LOGGER.info("   ** Leveling gain with mp3gain")
     mp3.mp3gain(mp3_list, target_volume, debug)
 
-    LOGGER.info(" ** Calculating replaygain")
+    LOGGER.info("   ** Calculating replaygain and adding tags")
     mp3.replaygain(mp3_list, target_volume)
 
-    LOGGER.info(" ** Correcting tags")
+    LOGGER.info("   ** Correcting tags and images")
     for mp3_file in mp3_list:
         mp3.remove_ape_tags(mp3_file)
         mp3.fix_cover_tag(mp3_file, cover_image)
@@ -152,7 +152,7 @@ def _main_process_mp3_dir(base: str, path: str, image_height: int, target_volume
     mp3_list = fops.list_files_by_extension(full_path, 'mp3')
     nfo_data = mp3.album_nfo_from_file(os.path.join(full_path, mp3_list[0]))
 
-    LOGGER.info("Processing: %s/%s", nfo_data.get('album').get('artistdesc'), nfo_data.get('album').get('title'))
+    LOGGER.info(" * %s", nfo_data.get('album').get('title'))
 
     if kwargs.get('tags_only'):
         with fops.pushd(full_path):
@@ -162,14 +162,14 @@ def _main_process_mp3_dir(base: str, path: str, image_height: int, target_volume
     folder_image = image.image_find(full_path, 'folder')
 
     if folder_image and not ignore_folder:
-        LOGGER.warning(" ** %s found: Skipping because already processed", folder_image)
+        LOGGER.warning("   ** %s found: Skipping because already processed", folder_image)
         return
 
     cover_image = image.image_find(full_path, 'cover')
     discart_image = image.image_find(full_path, 'discart')
 
     if not cover_image:
-        LOGGER.error(" ** No cover image found: Skipping.")
+        LOGGER.error("   ** No cover image found: Skipping.")
         return
 
     with fops.pushd(full_path):
