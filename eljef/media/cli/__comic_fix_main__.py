@@ -13,7 +13,7 @@
 # Authors:
 # Jef Oliver <jef@eljef.me>
 #
-# __fix_comic_args__.py : ElJef Fix Comic CLI Program Main Functionality
+# __comic_fix_args__.py : ElJef Fix Comic CLI Program Main Functionality
 """ElJef Fix Comic CLI Program Main Functionality"""
 from collections import namedtuple
 
@@ -23,8 +23,8 @@ import tempfile
 
 from eljef.core import (applog, cli, fops)
 from eljef.media.__version__ import VERSION
-from eljef.media.cli.__fix_comic_args__ import CMD_LINE_ARGS
-from eljef.media.cli.__fix_comic_vars__ import (DESCRIPTION, NAME)
+from eljef.media.cli.__comic_fix_args__ import CMD_LINE_ARGS
+from eljef.media.cli.__comic_fix_vars__ import (DESCRIPTION, NAME)
 from eljef.media.lib import comic
 
 LOGGER = logging.getLogger()

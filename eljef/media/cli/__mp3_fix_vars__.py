@@ -13,8 +13,8 @@
 # Authors:
 # Jef Oliver <jef@eljef.me>
 #
-# __fix_mp3_args__.py : ElJef Fix MP3 CLI Program Variables
+# __mp3_fix_vars__.py : ElJef Fix MP3 CLI Program Variables
 """ElJef Fix MP3 CLI Program Variables"""
 
 DESCRIPTION = 'ElJef MP3 File Cleanup'
-NAME = 'fix-mp3s'
+NAME = 'ej-mp3-fix'

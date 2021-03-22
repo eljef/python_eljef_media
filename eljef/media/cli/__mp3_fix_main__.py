@@ -13,7 +13,7 @@
 # Authors:
 # Jef Oliver <jef@eljef.me>
 #
-# __fix_comic_args__.py : ElJef Fix MP3 CLI Program Main Functionality
+# __mp3_fix_main__.py : ElJef Fix MP3 CLI Program Main Functionality
 """ElJef Fix MP3 CLI Program Main Functionality"""
 
 import logging
@@ -22,8 +22,8 @@ import shutil
 
 from eljef.core import (applog, cli, fops)
 from eljef.media.__version__ import VERSION
-from eljef.media.cli.__fix_mp3_args__ import CMD_LINE_ARGS
-from eljef.media.cli.__fix_mp3_vars__ import (DESCRIPTION, NAME)
+from eljef.media.cli.__mp3_fix_args__ import CMD_LINE_ARGS
+from eljef.media.cli.__mp3_fix_vars__ import (DESCRIPTION, NAME)
 from eljef.media.lib import (mp3, image)
 
 # noinspection PyPackageRequirements

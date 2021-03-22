@@ -13,7 +13,7 @@
 # Authors:
 # Jef Oliver <jef@eljef.me>
 #
-# __fix_comic_args__.py : ElJef Fix Comic CLI Program Args
+# __comic_fix_args__.py : ElJef Fix Comic CLI Program Args
 """ElJef Fix Comic CLI Program Args"""
 
 from eljef.core import cli

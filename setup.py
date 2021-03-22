@@ -17,8 +17,9 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'fix-comic = eljef.media.cli.__fix_comic_main__:cli_main',
-            'fix-mp3s = eljef.media.cli.__fix_mp3_main__:cli_main'
+            'ej-comic-fix = eljef.media.cli.__comic_fix_main__:cli_main',
+            'ej-mp3-fix = eljef.media.cli.__mp3_fix_main__:cli_main',
+            'ej-mp3-tag-dump = eljef.media.cli.__mp3_dump_tags_main__:cli_main'
         ]
     },
 )

@@ -32,6 +32,10 @@ from rgain3 import (rgcalc, rgio, util)
 
 LOGGER = logging.getLogger(__name__)
 
+FID_APIC = 'APIC:'
+"""APIC Field ID"""
+FID_LYRICS = 'USLT'
+"""Lyrics Field ID"""
 
 __CMD_MP3GAIN = ['mp3gain', '-a', '-c', '-r']
 
@@ -39,7 +43,6 @@ __DEFAULT_TRACK_GAIN = float(89)
 
 __FID_ALBUM_ARTIST = 'TPE2'
 __FID_ALBUM_TITLE = 'TALB'
-__FID_APIC = 'APIC:'
 __FID_DATE_ORIG_RELEASE = 'TDOR'
 __FID_DATE_RECORDED = 'TDRC'
 __FID_DATE_RELEASE = 'TDRL'
@@ -197,8 +200,8 @@ def fix_cover_tag(path: str, cover_image: str) -> None:
     LOGGER.debug(" ** %s - Removing all images", path)
     mp3_data = mutagen.File(path)
 
-    if __FID_APIC in mp3_data.tags.keys():
-        del mp3_data.tags[__FID_APIC]
+    if FID_APIC in mp3_data.tags.keys():
+        del mp3_data.tags[FID_APIC]
 
     LOGGER.debug(" ** %s - Adding front cover image", path)
     mime_type = mimetypes.guess_type(cover_image)[0]

@@ -13,7 +13,7 @@
 # Authors:
 # Jef Oliver <jef@eljef.me>
 #
-# __fix_mp3_args__.py : ElJef Fix MP3 CLI Program Args
+# __mp3_fix_args__.py : ElJef Fix MP3 CLI Program Args
 """ElJef Fix MP3 CLI Program Args"""
 
 from eljef.core import cli

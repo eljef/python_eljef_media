@@ -13,8 +13,8 @@
 # Authors:
 # Jef Oliver <jef@eljef.me>
 #
-# __fix_comic_args__.py : ElJef Fix Comic CLI Program Variables
+# __comic_fix_args__.py : ElJef Fix Comic CLI Program Variables
 """ElJef Fix Comic CLI Program Variables"""
 
 DESCRIPTION = 'ElJef Comic Book Cleanup'
-NAME = 'fix-comic'
+NAME = 'ej-comic-fix'
