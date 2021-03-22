@@ -143,9 +143,6 @@ def _main_process_mp3_dir(base: str, path: str, image_height: int, target_volume
         ignore_folder (bool): Ignore the presence of folder.jpg
         tags_only (bool): Only correct tags on MP3 files
     """
-    debug = kwargs.get('debug', False)
-    ignore_folder = kwargs.get('ignore_folder', False)
-
     full_path = os.path.join(base, path)
     LOGGER.debug("Processing: %s", full_path)
 
@@ -161,7 +158,7 @@ def _main_process_mp3_dir(base: str, path: str, image_height: int, target_volume
 
     folder_image = image.image_find(full_path, 'folder')
 
-    if folder_image and not ignore_folder:
+    if folder_image and not kwargs.get('ignore_folder', False):
         LOGGER.warning("   ** %s found: Skipping because already processed", folder_image)
         return
 
@@ -174,7 +171,7 @@ def _main_process_mp3_dir(base: str, path: str, image_height: int, target_volume
 
     with fops.pushd(full_path):
         _main_process_mp3_dir_images(cover_image, folder_image, discart_image, image_height)
-        _main_process_mp3_dir_mp3s(mp3_list, cover_image, target_volume, debug)
+        _main_process_mp3_dir_mp3s(mp3_list, cover_image, target_volume, kwargs.get('debug'))
         _main_process_mp3_dir_finish(nfo_data)
 
 
@@ -189,18 +186,15 @@ def main(**kwargs) -> None:
         tags_only (bool): Only correct the tags on MP3 files.
         target_volume (float): Target volume for mp3 files via mp3gain.
     """
-    debug = kwargs.get('debug')
-    directory = kwargs.get('directory')
-    ignore_folder = kwargs.get('ignore_folder')
-    image_height = kwargs.get('image_height')
-    target_volume = kwargs.get('target_volume')
-
     _ = Gst.init(None)
 
+    directory = kwargs.get('directory')
     mp3dirs = _main_get_mp3_dirs(directory)
+
     for dir_to_process in sorted(mp3dirs):
-        _main_process_mp3_dir(directory, dir_to_process, image_height, target_volume,
-                              debug=debug, ignore_folder=ignore_folder, tags_only=kwargs.get('tags_only'))
+        _main_process_mp3_dir(directory, dir_to_process, kwargs.get('image_height'), kwargs.get('target_volume'),
+                              debug=kwargs.get('debug'), ignore_folder=kwargs.get('ignore_folder'),
+                              tags_only=kwargs.get('tags_only'))
 
 
 def cli_main() -> None:
