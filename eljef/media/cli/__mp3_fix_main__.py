@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-# Copyright (c) 2020, Jef Oliver
+# Copyright (c) 2020-2022, Jef Oliver
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms and conditions of the GNU Lesser General Public License,
@@ -207,17 +207,17 @@ def cli_main() -> None:
     applog.setup_app_logging(args.debug_log, args.log_file)
 
     if args.max_image_height < 1:
-        raise ValueError("Max image height must be greater than 0. Specified %d" % args.max_image_height)
+        raise ValueError(f"Max image height must be greater than 0. Specified {args.max_image_height}")
     if args.target_volume < float(1):
-        raise ValueError("Target volume must be greater than 0. Specified %f" % args.target_volume)
+        raise ValueError(f"Target volume must be greater than 0. Specified {args.target_volume}")
 
     if not os.path.exists(args.mp3_directory):
-        raise FileNotFoundError("Specified directory does not exist: %s" % args.mp3_directory)
+        raise FileNotFoundError(f"Specified directory does not exist: {args.mp3_directory}")
 
     dir_to_process = os.path.abspath(args.mp3_directory)
 
     if not os.path.isdir(dir_to_process):
-        raise NotADirectoryError("Specified directory path is not a directory: %s" % args.mp3_directory)
+        raise NotADirectoryError(f"Specified directory path is not a directory: {args.mp3_directory}")
 
     fops.required_executables(__REQUIRED_EXECS)
 

@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-# Copyright (c) 2021, Jef Oliver
+# Copyright (c) 2021-2022, Jef Oliver
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms and conditions of the GNU Lesser General Public License,
@@ -164,7 +164,7 @@ def album_nfo_from_file(path: str) -> dict:
 def correct_replaygain_tags(path: str) -> None:
     """Make sure replaygain tags are lower case.
 
-    TXXX tags are not supposed to be case insensitive. Some players suck and
+    TXXX tags are not supposed to be case-insensitive. Some players suck and
     only read upper or lower case tags. Instead of forcing everything to upper,
     force everything to lower and check for upper case tags from players and
     report bugs to them.
@@ -248,7 +248,7 @@ def mp3gain(mp3s: list, target_gain: float, debug: bool) -> None:
 
 
 def remove_ape_tags(path: str) -> None:
-    """Removes APE tags fro the MP3 file.
+    """Removes APE tags for the MP3 file.
 
     Args:
         path: path to MP3 file to remove tags from

@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-# Copyright (c) 2020, Jef Oliver
+# Copyright (c) 2020-2022, Jef Oliver
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms and conditions of the GNU Lesser General Public License,
@@ -75,7 +75,7 @@ def copy_images(orig_path: str, new_path: str, images: list, convert_to: str) ->
         convert_to: If set, convert image files to the specified type.
 
     Returns:
-        A list of image files to be compress into the new comic book archive
+        A list of image files to be compressed into the new comic book archive
     """
     new_ext = convert_to if convert_to else _DEFAULT_IMAGE_TYPE
     if new_ext not in _SUPPORTED_IMAGE_TYPES:
@@ -162,7 +162,7 @@ def extract(comic: str, path: str, debug: bool = False) -> None:
 
 
 def filter_pages(files: list) -> list:
-    """Filters names of files to determine if they are they are numbered pages.
+    """Filters names of files to determine if they are numbered pages.
 
     Args:
         files: A list of file names to filter.

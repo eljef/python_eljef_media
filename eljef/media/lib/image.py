@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-# Copyright (c) 2021, Jef Oliver
+# Copyright (c) 2021-2022, Jef Oliver
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms and conditions of the GNU Lesser General Public License,
@@ -49,7 +49,7 @@ def _convert_and_resize(path: str, mid: str, target: str, max_height: int, encod
 
     Args:
         path: Path to original file
-        mid: Path to mid step file.
+        mid: Path to mid-step file.
         target: Path to new file.
         max_height: New height for image.
         encoding: Image encoding. (ie. RGB, RGBA)
@@ -68,13 +68,13 @@ def _convert_and_resize(path: str, mid: str, target: str, max_height: int, encod
 
 
 def cover_fix(path: str, max_height: int) -> None:
-    """Converts and resizes cover.ext
+    """Converts and resizes cover.[ext]
 
-    Converts cover.ext to cover.jpg and resizes it to `max_height`, maintaining
+    Converts cover.[ext] to cover.jpg and resizes it to `max_height`, maintaining
     aspect ratio.
 
     Args:
-        path: Path to cover.ext
+        path: Path to cover.[ext]
         max_height: The max height the image is allowed to be.
 
     Raises:
@@ -93,11 +93,11 @@ def cover_fix(path: str, max_height: int) -> None:
 def discart_fix(path: str, max_height: int) -> None:
     """Converts and resizes discart
 
-    Converts discart.ext to discart.png and resizes it to `max_height`,
+    Converts discart.[ext] to discart.png and resizes it to `max_height`,
     maintaining aspect ratio.
 
     Args:
-        path: Path to discart.ext
+        path: Path to discart.[ext]
         max_height: The max height the image is allowed to be.
 
     Raises:
@@ -114,14 +114,14 @@ def discart_fix(path: str, max_height: int) -> None:
 
 
 def image_find(path: str, image_name: str) -> str:
-    """Checks if a image.ext exists in `path`
+    """Checks if an image.[ext] exists in `path`
 
     Args:
-        path: Directory to check for image.ext in.
+        path: Directory to check for image.[ext] in.
         image_name: Name of image to look for without extension.
 
     Returns:
-        Name of image.ext file if one is found, blank otherwise.
+        Name of image.[ext] file if one is found, blank otherwise.
     """
     LOGGER.debug("Searching for %s.ext in: %s", image_name, path)
     with fops.pushd(path):
