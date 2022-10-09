@@ -7,13 +7,17 @@ mutagen
 Pillow
 rgain3
 
+#### Needed for building ####
+build
+installer
+wheel
+
 #### Needed for linting ####
 flake8
 pylint
 
 #### Needed for testing ####
 pytest
-pytest-pythonpath # so tests can be run from the separated tests directory
 
 #### Needed for testing coverage ****
 pytest-cov

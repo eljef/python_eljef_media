@@ -1,0 +1,24 @@
+# Maintainer: Jef Oliver (jef at eljef dot me)
+
+_pkgname=eljef_media
+pkgname=python-eljef-media
+pkgver=0.4.0
+pkgrel=1
+pkgdesc="Various Media Helpers."
+arch=('aarch64' 'x86_64')
+url='https://git.eljef.me/python/eljef_media'
+license=('LGPL2.1')
+depends=('mp3gain' 'python-eljef-core' 'python-mutagen' 'python-pillow' 'rgain3' 'unarchiver')
+makedepends=('git' 'python-build' 'python-installer' 'python-setuptools' 'python-wheel')
+source=("${_pkgname}::git+https://git.eljef.me/python/eljef_media.git")
+sha512sums=('SKIP')
+
+build() {
+    cd "${_pkgname}"
+    python3 -m build --wheel --no-isolation
+}
+
+package() {
+    cd "${_pkgname}"
+    python3 -m installer --destdir="$pkgdir" dist/*.whl
+}
