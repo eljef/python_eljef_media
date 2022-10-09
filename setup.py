@@ -13,7 +13,7 @@ setup(
     packages=['eljef.media', 'eljef.media.cli', 'eljef.media.lib'],
     python_requires='>=3.8',
     url='https://github.com/eljef/python_eljef_media',
-    version='0.4.0',
+    version='2022.10.1',
     entry_points={
         'console_scripts': [
             'ej-comic-fix = eljef.media.cli.__comic_fix_main__:cli_main',

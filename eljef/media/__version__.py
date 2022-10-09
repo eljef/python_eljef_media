@@ -1,3 +1,3 @@
 # -*- coding: UTF-8 -*-
 """ElJef Media Version"""
-VERSION = '0.4.0'
+VERSION = '2022.10.1'

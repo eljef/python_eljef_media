@@ -2,7 +2,7 @@
 
 _pkgname=eljef_media
 pkgname=python-eljef-media
-pkgver=0.4.0
+pkgver=2022.10.1
 pkgrel=1
 pkgdesc="Various Media Helpers."
 arch=('aarch64' 'x86_64')
