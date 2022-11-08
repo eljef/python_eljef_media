@@ -2,7 +2,7 @@
 # pip install -r requirements.txt
 
 #### Required for operation ####
-git+https://git.eljef.me/python/eljef_core.git@1.6.0#egg=eljef-core
+git+https://eljef.dev/python/eljef_core.git@2022.11.2
 mutagen
 Pillow
 rgain3

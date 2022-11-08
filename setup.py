@@ -7,12 +7,12 @@ setup(
     author='Jef Oliver',
     author_email='jef@eljef.me',
     description='Various media utilities written by Jef Oliver',
-    install_requires=['eljef-core>=2022.10.2', 'mutagen', 'Pillow', 'rgain3'],
-    license='LGPLv2.1',
+    install_requires=['eljef-core>=2022.11.2', 'mutagen', 'Pillow', 'rgain3'],
+    license='0BSD',
     name='eljef-media',
     packages=['eljef.media', 'eljef.media.cli', 'eljef.media.lib'],
     python_requires='>=3.8',
-    url='https://github.com/eljef/python_eljef_media',
+    url='https://eljef.dev/python/eljef_media',
     version='2022.10.1',
     entry_points={
         'console_scripts': [
