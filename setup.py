@@ -13,7 +13,7 @@ setup(
     packages=['eljef.media', 'eljef.media.cli', 'eljef.media.lib'],
     python_requires='>=3.8',
     url='https://eljef.dev/python/eljef_media',
-    version='2022.11.1',
+    version='2023.06.1',
     entry_points={
         'console_scripts': [
             'ej-beet-flac = eljef.media.cli.__beet_flac_main__:cli_main',

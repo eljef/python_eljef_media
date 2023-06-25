@@ -2,4 +2,4 @@
 # SPDX-License-Identifier: 0BSD
 
 """ElJef Media Version"""
-VERSION = '2022.11.1'
+VERSION = '2023.06.1'
