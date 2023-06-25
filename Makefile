@@ -1,4 +1,4 @@
-VERSION := 2023.06.1
+VERSION := 2023.06.2
 
 # all runs help
 all : help
