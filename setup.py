@@ -7,7 +7,7 @@ setup(
     author='Jef Oliver',
     author_email='jef@eljef.me',
     description='Various media utilities written by Jef Oliver',
-    install_requires=['eljef-core>=2022.11.2', 'mutagen', 'Pillow', 'rgain3'],
+    install_requires=['eljef-core>=2023.06.1', 'mutagen', 'Pillow', 'rgain3'],
     license='0BSD',
     name='eljef-media',
     packages=['eljef.media', 'eljef.media.cli', 'eljef.media.lib'],
@@ -16,6 +16,7 @@ setup(
     version='2022.11.1',
     entry_points={
         'console_scripts': [
+            'ej-beet-flac = eljef.media.cli.__beet_flac_main__:cli_main',
             'ej-comic-fix = eljef.media.cli.__comic_fix_main__:cli_main',
             'ej-mp3-fix = eljef.media.cli.__mp3_fix_main__:cli_main',
             'ej-mp3-tag-dump = eljef.media.cli.__mp3_dump_tags_main__:cli_main'

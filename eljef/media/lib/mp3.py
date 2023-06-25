@@ -17,6 +17,8 @@ import mutagen.id3
 from gi.repository import GLib
 from rgain3 import (rgcalc, rgio, util)
 
+from eljef.media.lib.nfo import album_nfo_base
+
 LOGGER = logging.getLogger(__name__)
 
 FID_APIC = 'APIC:'
@@ -47,19 +49,6 @@ __FID_REPLAYGAIN_REF_LOUD = 'TXXX:replaygain_reference_loudness'
 __FID_REPLAYGAIN_TRACK_GAIN = 'TXXX:replaygain_track_gain'
 __FID_REPLAYGAIN_TRACK_PEAK = 'TXXX:replaygain_track_peak'
 
-__XML_ID_ALBUM = 'album'
-__XML_ID_ALBUM_ARTIST_CREDITS = 'albumArtistCredits'
-__XML_ID_ALBUM_TYPE = 'type'
-__XML_ID_ARTIST = 'artist'
-__XML_ID_ARTIST_DESC = 'artistdesc'
-__XML_ID_MB_ALBUM_ID = 'musicbrainzalbumid'
-__XML_ID_MB_ARTIST_ID = 'musicBrainzArtistID'
-__XML_ID_MB_RELEASE_GROUP_ID = 'musicbrainzreleasegroupid'
-__XML_ID_LABEL = 'label'
-__XML_ID_RELEASE_DATE = 'releasedate'
-__XML_ID_SCRAPEDMBID = 'scrapedmbid'
-__XML_ID_TITLE = 'title'
-
 __REPLAYGAIN_FRAMES_FOR_COMP = (__FID_RELATIVE_VOLUME_ALBUM.lower(), __FID_RELATIVE_VOLUME_TRACK.lower(),
                                 __FID_REPLAYGAIN_ALBUM_GAIN.lower(), __FID_REPLAYGAIN_ALBUM_PEAK.lower(),
                                 __FID_REPLAYGAIN_Q_REF_LOUD.lower(), __FID_REPLAYGAIN_REF_LOUD.lower(),
@@ -69,7 +58,31 @@ __REPLAYGAIN_FRAMES_FOR_CASE = (__FID_REPLAYGAIN_ALBUM_GAIN.lower(), __FID_REPLA
                                 __FID_REPLAYGAIN_TRACK_GAIN.lower(), __FID_REPLAYGAIN_TRACK_PEAK.lower())
 
 
-def _album_nfo_from_file_date_tags(path: str, tag_data: mutagen.id3.ID3) -> str:
+def _mb_tags_from_id3(path: str, tag_data: mutagen.id3.ID3) -> Tuple[str, str, str, str]:
+    """Returns ID3 Musicbrainz Identifiers
+
+    Args:
+        path: path to MP3 file to read tags from
+        tag_data: ID3 tag object
+
+    Returns:
+        A list of Musicbrainz identifiers
+        0 -> Musicbrainz Release Group ID
+        1 -> Musicbrainz Artist ID
+        2 -> Musicbrainz Album Type
+        3 -> Musicbrainz Album Artist Credit
+    """
+    LOGGER.debug("Retrieving MusicBrainz tags from %s", path)
+
+    release_group_id = str(tag_data.get(__FID_MB_RELEASE_GROUP_ID, ''))
+    artist_id = str(tag_data.get(__FID_MB_ALBUM_ID, ''))
+    album_type = str(tag_data.get(__FID_MB_ALBUM_TYPE, ''))
+    artist_credits = str(tag_data.get(__FID_MB_ARTIST_ID, ''))
+
+    return release_group_id, artist_id, album_type, artist_credits
+
+
+def _release_date_from_id3(path: str, tag_data: mutagen.id3.ID3) -> str:
     """Returns a formatted release date string.
 
     Args:
@@ -91,34 +104,7 @@ def _album_nfo_from_file_date_tags(path: str, tag_data: mutagen.id3.ID3) -> str:
     return '0000-00-00'
 
 
-def _album_nfo_from_file_mb_tags(path: str, tag_data: mutagen.id3.ID3, nfo_data: dict) -> dict:
-    """Returns a dictionary that includes MusicBrainz info
-
-    Args:
-        path: path to MP3 file to read tags from
-        tag_data: ID3 tag object
-        nfo_data: Dictionary of data to be used for generating a NFO file.
-
-    Returns:
-        A dictionary suitable for usage in generating a NFO file.
-    """
-    LOGGER.debug("Retrieving MusicBrainz tags from %s", path)
-
-    ret = nfo_data
-
-    for mp3_fid, xml_id in ((__FID_MB_RELEASE_GROUP_ID, __XML_ID_MB_RELEASE_GROUP_ID),
-                            (__FID_MB_ALBUM_ID, __XML_ID_MB_ALBUM_ID),
-                            (__FID_MB_ALBUM_TYPE, __XML_ID_ALBUM_TYPE)):
-        if mp3_fid in tag_data:
-            ret[__XML_ID_ALBUM][xml_id] = str(tag_data[mp3_fid])
-
-    if __FID_MB_ARTIST_ID in tag_data:
-        ret[__XML_ID_ALBUM][__XML_ID_ALBUM_ARTIST_CREDITS][__XML_ID_MB_ARTIST_ID] = str(tag_data[__FID_MB_ARTIST_ID])
-
-    return ret
-
-
-def album_nfo_from_file(path: str) -> dict:
+def album_nfo_from_mp3_file(path: str) -> dict:
     """Returns a dictionary of NFO data
 
     Args:
@@ -130,22 +116,17 @@ def album_nfo_from_file(path: str) -> dict:
     LOGGER.debug("Reading MP3 tags from %s", path)
     mp3 = mutagen.File(path)
 
-    ret = {
-        __XML_ID_ALBUM: {
-            __XML_ID_TITLE: str(mp3.tags[__FID_ALBUM_TITLE]),
-            __XML_ID_ARTIST_DESC: str(mp3.tags[__FID_ALBUM_ARTIST]),
-            __XML_ID_SCRAPEDMBID: True,
-            __XML_ID_RELEASE_DATE: _album_nfo_from_file_date_tags(path, mp3.tags),
-            __XML_ID_ALBUM_ARTIST_CREDITS: {
-                __XML_ID_ARTIST: str(mp3.tags[__FID_ALBUM_ARTIST]),
-            }
-        }
-    }
-
+    publisher = ""
     if __FID_PUBLISHER in mp3.tags:
-        ret[__XML_ID_ALBUM][__XML_ID_LABEL] = str(mp3.tags[__FID_PUBLISHER])
+        publisher = str(mp3.tags[__FID_PUBLISHER])
 
-    return _album_nfo_from_file_mb_tags(path, mp3.tags, ret)
+    release_group_id, artist_id, album_type, artist_credits = _mb_tags_from_id3(path, mp3.tags)
+
+    ret = album_nfo_base(str(mp3.tags[__FID_ALBUM_TITLE]), str(mp3.tags[__FID_ALBUM_ARTIST]),
+                         _release_date_from_id3(path, mp3.tags), publisher, mb_release_group=release_group_id,
+                         mb_artist_id=artist_id, mb_album_type=album_type, mb_artist_credits=artist_credits)
+
+    return ret
 
 
 def correct_replaygain_tags(path: str) -> None:
@@ -193,6 +174,7 @@ def fix_cover_tag(path: str, cover_image: str) -> None:
     LOGGER.debug(" ** %s - Adding front cover image", path)
     mime_type = mimetypes.guess_type(cover_image)[0]
     with open(fr'{cover_image}', 'rb') as cover_rb:
+        # noinspection PyUnresolvedReferences
         mp3_data.tags.add(mutagen.id3.APIC(mime=mime_type, type=mutagen.id3.PictureType.COVER_FRONT,
                                            data=cover_rb.read()))
 

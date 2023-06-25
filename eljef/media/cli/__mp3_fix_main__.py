@@ -5,13 +5,13 @@
 
 import logging
 import os
-import shutil
 
 from eljef.core import (applog, cli, fops)
 from eljef.media.__version__ import VERSION
 from eljef.media.cli.__mp3_fix_args__ import CMD_LINE_ARGS
 from eljef.media.cli.__mp3_fix_vars__ import (DESCRIPTION, NAME)
 from eljef.media.lib import (mp3, image)
+from eljef.media.lib.cli import (ALBUM_NFO, album_dir_finish, check_media_dir, exit_with_error, get_media_dirs)
 
 # noinspection PyPackageRequirements
 # pylint: disable=wrong-import-position,wrong-import-order
@@ -22,59 +22,7 @@ from gi.repository import Gst  # noqa
 
 LOGGER = logging.getLogger()
 
-__ALBUM_NFO = 'album.nfo'
 __REQUIRED_EXECS = ['mp3gain']
-
-
-def _main_get_mp3_dirs(path: str) -> set:
-    """Returns a list of directories containing mp3s, exiting the CLI program if none exist.
-
-    Args:
-        path: base directory to search for MP3s in.
-
-    Returns:
-        A set containing folders that contain MP3 files.
-    """
-    mp3dirs = fops.list_dirs_by_extension(path, 'mp3')
-    if len(mp3dirs) < 1:
-        LOGGER.error("No MP3 files found")
-        raise SystemExit
-
-    return mp3dirs
-
-
-def _main_process_mp3_dir_finish(nfo_data: dict) -> None:
-    """Copies cover.jpg to folder.jpg, and saves album.nfo
-
-    Args:
-        nfo_data: dictionary of NFO data to save to album.nfo
-    """
-    LOGGER.info("   ** cover.jpg -> folder.jpg")
-    shutil.copyfile("cover.jpg", 'folder.jpg')
-
-    LOGGER.info("   ** album.nfo")
-    fops.file_write_convert(__ALBUM_NFO, fops.XML, nfo_data)
-
-
-def _main_process_mp3_dir_images(cover_image: str, folder_image: str, discart_image: str, image_height: int) -> None:
-    """Processes images in the MP3 directory (Album Directory)
-
-    Args:
-        cover_image: Name of cover image. (Typically cover.jpg)
-        folder_image:  Name of folder image. (Typically folder.jpg)
-        discart_image: Name of discart image. (Typically discart.png)
-        image_height: The height that images should be resized to. (Maintaining aspect ratio.)
-    """
-    fops.delete(folder_image)
-
-    image.cover_fix(cover_image, image_height)
-    if cover_image != "cover.jpg":
-        fops.delete(cover_image)
-
-    if discart_image:
-        image.discart_fix(discart_image, image_height)
-        if discart_image != "discart.png":
-            fops.delete(discart_image)
 
 
 def _main_process_mp3_dir_mp3s_tags_only(mp3_list: list) -> None:
@@ -134,7 +82,7 @@ def _main_process_mp3_dir(base: str, path: str, image_height: int, target_volume
     LOGGER.debug("Processing: %s", full_path)
 
     mp3_list = fops.list_files_by_extension(full_path, 'mp3')
-    nfo_data = mp3.album_nfo_from_file(os.path.join(full_path, mp3_list[0]))
+    nfo_data = mp3.album_nfo_from_mp3_file(os.path.join(full_path, mp3_list[0]))
 
     LOGGER.info(" * %s", nfo_data.get('album').get('title'))
 
@@ -157,9 +105,9 @@ def _main_process_mp3_dir(base: str, path: str, image_height: int, target_volume
         return
 
     with fops.pushd(full_path):
-        _main_process_mp3_dir_images(cover_image, folder_image, discart_image, image_height)
+        cover_image, discart_image = image.process_dir_images(cover_image, folder_image, discart_image, image_height)
         _main_process_mp3_dir_mp3s(mp3_list, cover_image, target_volume, kwargs.get('debug'))
-        _main_process_mp3_dir_finish(nfo_data)
+        album_dir_finish(ALBUM_NFO, nfo_data)
 
 
 def main(**kwargs) -> None:
@@ -176,7 +124,7 @@ def main(**kwargs) -> None:
     _ = Gst.init(None)
 
     directory = kwargs.get('directory')
-    mp3dirs = _main_get_mp3_dirs(directory)
+    mp3dirs = get_media_dirs(directory, 'mp3', 'No MP3 files found')
 
     for dir_to_process in sorted(mp3dirs):
         _main_process_mp3_dir(directory, dir_to_process, kwargs.get('image_height'), kwargs.get('target_volume'),
@@ -194,17 +142,11 @@ def cli_main() -> None:
     applog.setup_app_logging(args.debug_log, args.log_file)
 
     if args.max_image_height < 1:
-        raise ValueError(f"Max image height must be greater than 0. Specified {args.max_image_height}")
+        exit_with_error(f"Max image height must be greater than 0. Specified {args.max_image_height}")
     if args.target_volume < float(1):
-        raise ValueError(f"Target volume must be greater than 0. Specified {args.target_volume}")
+        exit_with_error(f"Target volume must be greater than 0. Specified {args.target_volume}")
 
-    if not os.path.exists(args.mp3_directory):
-        raise FileNotFoundError(f"Specified directory does not exist: {args.mp3_directory}")
-
-    dir_to_process = os.path.abspath(args.mp3_directory)
-
-    if not os.path.isdir(dir_to_process):
-        raise NotADirectoryError(f"Specified directory path is not a directory: {args.mp3_directory}")
+    dir_to_process = check_media_dir(args.mp3_directory)
 
     fops.required_executables(__REQUIRED_EXECS)
 

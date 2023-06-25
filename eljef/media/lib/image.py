@@ -25,13 +25,13 @@ def _calc_size(max_height: int, cur_width: int, cur_height: int) -> Tuple[int, i
     Returns:
         A tuple with the new width and height
     """
-    new_height_percent = (max_height / float(cur_height))
+    new_height_percent = max_height / float(cur_height)
     new_width = int((float(cur_width) * float(new_height_percent)))
 
     return new_width, max_height
 
 
-def _convert_and_resize(path: str, mid: str, target: str, max_height: int, encoding: str) -> None:
+def _convert_and_resize(path: str, mid: str, target: str, max_height: int, encoding: str) -> str:
     """Converts and resizes an image.
 
     Args:
@@ -40,6 +40,9 @@ def _convert_and_resize(path: str, mid: str, target: str, max_height: int, encod
         target: Path to new file.
         max_height: New height for image.
         encoding: Image encoding. (ie. RGB, RGBA)
+
+    Returns:
+        path to new file.
     """
     LOGGER.debug("Converting '%s' to '%s'", path, mid)
     with Image.open(fr'{path}') as image_file:
@@ -53,8 +56,10 @@ def _convert_and_resize(path: str, mid: str, target: str, max_height: int, encod
     LOGGER.debug("%s -> %s", mid, target)
     os.rename(fr'{mid}', fr'{target}')
 
+    return target
 
-def cover_fix(path: str, max_height: int) -> None:
+
+def cover_fix(path: str, max_height: int) -> str:
     """Converts and resizes cover.[ext]
 
     Converts cover.[ext] to cover.jpg and resizes it to `max_height`, maintaining
@@ -63,6 +68,9 @@ def cover_fix(path: str, max_height: int) -> None:
     Args:
         path: Path to cover.[ext]
         max_height: The max height the image is allowed to be.
+
+    Returns:
+        path to new file.
 
     Raises:
         ValueError: If the provided path is not a cover
@@ -74,10 +82,10 @@ def cover_fix(path: str, max_height: int) -> None:
     target = f"{orig}.jpg"
     mid = f"{orig}.new.jpg"
 
-    _convert_and_resize(path, mid, target, max_height, 'RGB')
+    return _convert_and_resize(path, mid, target, max_height, 'RGB')
 
 
-def discart_fix(path: str, max_height: int) -> None:
+def discart_fix(path: str, max_height: int) -> str:
     """Converts and resizes discart
 
     Converts discart.[ext] to discart.png and resizes it to `max_height`,
@@ -86,6 +94,9 @@ def discart_fix(path: str, max_height: int) -> None:
     Args:
         path: Path to discart.[ext]
         max_height: The max height the image is allowed to be.
+
+    Returns:
+        path to new file.
 
     Raises:
         ValueError: If the provided path is not a discart.
@@ -97,7 +108,7 @@ def discart_fix(path: str, max_height: int) -> None:
     target = f"{orig}.png"
     mid = f"{orig}.new.png"
 
-    _convert_and_resize(path, mid, target, max_height, 'RGBA')
+    return _convert_and_resize(path, mid, target, max_height, 'RGBA')
 
 
 def image_find(path: str, image_name: str) -> str:
@@ -118,3 +129,32 @@ def image_find(path: str, image_name: str) -> str:
                 return image_file
 
     return ''
+
+
+def process_dir_images(cover_image: str, folder_image: str, discart_image: str, image_height: int) -> Tuple[str, str]:
+    """Processes images in album directory
+
+    Args:
+        cover_image: Name of cover image. (Typically cover.jpg)
+        folder_image:  Name of folder image. (Typically folder.jpg)
+        discart_image: Name of discart image. (Typically discart.png)
+        image_height: The height that images should be resized to. (Maintaining aspect ratio.)
+
+    Returns:
+        A tuple with two strings
+        tuple[0] = path to cover.jpg
+        tuple[1] = path to discart.png (empty if no discart_image was specified)
+    """
+    fops.delete(folder_image)
+
+    new_cover = cover_fix(cover_image, image_height)
+    if cover_image != new_cover:
+        fops.delete(cover_image)
+
+    new_discart = ''
+    if discart_image:
+        new_discart = discart_fix(discart_image, image_height)
+        if discart_image != new_discart:
+            fops.delete(discart_image)
+
+    return new_cover, new_discart
