@@ -122,11 +122,10 @@ class FLACFix:
             self.flac['replaygain_reference_loudness'] = f"{volume} dB"
 
 
-def _mb_tags_from_flac(path: str, tag_data: FLAC) -> Tuple[str, str, str, str]:
+def _mb_tags_from_flac(tag_data: FLAC) -> Tuple[str, str, str, str]:
     """Returns Musicbrainz Identifiers
 
     Args:
-        path: path to MP3 file to read tags from
         tag_data: FLAC tag object
 
     Returns:
@@ -136,8 +135,6 @@ def _mb_tags_from_flac(path: str, tag_data: FLAC) -> Tuple[str, str, str, str]:
         2 -> Musicbrainz Album Type
         3 -> Musicbrainz Album Artist Credit
     """
-    LOGGER.debug("Retrieving MusicBrainz tags from %s", path)
-
     release_group_id = _filter_attribute(tag_data.get(__FID_MB_RELEASE_GROUP_ID, ''))
     artist_id = _filter_attribute(tag_data.get(__FID_MB_ALBUM_ID, ''))
     album_type = _list_to_string(tag_data.get(__FID_MB_ALBUM_TYPE, ''))
@@ -146,18 +143,15 @@ def _mb_tags_from_flac(path: str, tag_data: FLAC) -> Tuple[str, str, str, str]:
     return release_group_id, artist_id, album_type, artist_credits
 
 
-def _release_date_from_flac(path: str, tag_data: FLAC) -> str:
+def _release_date_from_flac(tag_data: FLAC) -> str:
     """Returns a formatted release date string.
 
     Args:
-        path: path to MP3 file to read tags from
         tag_data: mutagen ID3 tags dictionary
 
     Returns:
         A formatted release date string.
     """
-    LOGGER.debug("Retrieving Date tags from %s", path)
-
     if __FID_DATE_ORIG_RELEASE in tag_data:
         return _filter_attribute(tag_data[__FID_DATE_ORIG_RELEASE])
     if __FID_DATE_RELEASE in tag_data:
@@ -166,27 +160,26 @@ def _release_date_from_flac(path: str, tag_data: FLAC) -> str:
     return '0000-00-00'
 
 
-def get_album_nfo(path: str) -> dict:
+def get_album_nfo(fixed_flac: FLACFix) -> dict:
     """Builds an album NFO dictionary
 
     Args:
-        path: Path to FLAC file to build NFO data from
+        fixed_flac: Path to FLAC file to build NFO data from
 
     Returns:
         A dictionary of NFO data to be written to a file
     """
-    LOGGER.debug("Reading vorbis tags from %s", path)
-    flac_data = FLAC(path)
+    flac_data = fixed_flac.flac
 
     publisher = ''
     if __FID_PUBLISHER in flac_data:
         publisher = _filter_attribute(flac_data[__FID_PUBLISHER])
 
-    release_group_id, artist_id, album_type, artist_credits = _mb_tags_from_flac(path, flac_data)
+    release_group_id, artist_id, album_type, artist_credits = _mb_tags_from_flac(flac_data)
 
     ret = album_nfo_base(_filter_attribute(flac_data[__FID_ALBUM_TITLE]),
                          _filter_attribute(flac_data[__FID_ALBUM_ARTIST]),
-                         _release_date_from_flac(path, flac_data),
+                         _release_date_from_flac(flac_data),
                          publisher, mb_release_group=release_group_id, mb_artist_id=artist_id,
                          mb_album_type=album_type, mb_artist_credits=artist_credits)
 

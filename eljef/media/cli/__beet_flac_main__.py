@@ -62,14 +62,18 @@ def _get_beets_gain_level(path: str) -> float:
     return target_volume
 
 
-def _process_flac_files(flac_list: list, cover_image: str, target_volume: float) -> None:
+def _process_flac_files(flac_list: list, cover_image: str, target_volume: float) -> list:
     """Process individual FLAC files
 
     Args:
         flac_list: List of MP3 files to process
         cover_image: Name of the image to use for the front cover.
         target_volume: Volume, in decibels, mp3gain should adjust a track to.
+
+    Returns:
+        A list of fixed flac objects
     """
+    ret = []
     LOGGER.info("   ** Correcting tags and images")
     for flac_file in flac_list:
         flac_to_fix = FLACFix(flac_file)
@@ -78,6 +82,9 @@ def _process_flac_files(flac_list: list, cover_image: str, target_volume: float)
         flac_to_fix.add_picture(cover_image)
         flac_to_fix.set_reference_loudness(target_volume)
         flac_to_fix.save()
+        ret.append(flac_to_fix)
+
+    return ret
 
 
 def _process_flac_dir(base: str, path: str, image_height: int, target_volume: float, **kwargs) -> None:
@@ -95,10 +102,9 @@ def _process_flac_dir(base: str, path: str, image_height: int, target_volume: fl
     full_path = os.path.join(base, path)
     LOGGER.debug("Processing: %s", full_path)
 
-    flac_list = fops.list_files_by_extension(full_path, 'flac')
-    nfo_data = get_album_nfo(os.path.join(full_path, flac_list[0]))
+    flac_list = sorted(fops.list_files_by_extension(full_path, 'flac'))
 
-    LOGGER.info(" * %s", nfo_data.get('album').get('title'))
+    LOGGER.info(" * %s", path)
 
     folder_image = image.image_find(full_path, 'folder')
 
@@ -115,7 +121,8 @@ def _process_flac_dir(base: str, path: str, image_height: int, target_volume: fl
 
     with fops.pushd(full_path):
         cover_image, discart_image = image.process_dir_images(cover_image, folder_image, discart_image, image_height)
-        _process_flac_files(flac_list, cover_image, target_volume)
+        fixed_flac_objs = _process_flac_files(flac_list, cover_image, target_volume)
+        nfo_data = get_album_nfo(fixed_flac_objs[0])
         album_dir_finish(ALBUM_NFO, nfo_data)
 
 
