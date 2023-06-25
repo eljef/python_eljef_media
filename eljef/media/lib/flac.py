@@ -26,6 +26,41 @@ __FID_MB_RELEASE_GROUP_ID = 'musicbrainz_releasegroupid'
 __FID_PUBLISHER = 'publisher'
 
 
+def _filter_attribute(attribute: Any) -> str:
+    """Filters an attribute to make sure only a string is returned.
+
+    Args:
+        attribute: Object to filter to a string
+
+    Returns:
+        The string form of the attribute value
+
+    Note:
+        If the attribute is a list, set, or tuple, the string is
+        made from the first member.
+    """
+    if isinstance(attribute, (bytes, str)):
+        return makestr(attribute)
+    if isinstance(attribute, (list, set, tuple)):
+        return makestr(attribute[0])
+
+    raise TypeError(f"data is not type of bytes, str, list, set, tuple -> type is {type(attribute)}")
+
+
+def _list_to_string(tag_data: Any) -> str:
+    """Converts a list, set, or tuple to a string
+
+    Args:
+        tag_data: list, set, or tuple to convert to string
+    """
+    if isinstance(tag_data, (bytes, str)):
+        return makestr(tag_data)
+    if isinstance(tag_data, (list, set, tuple)):
+        return ''.join(tag_data)
+
+    raise TypeError(f"data is not type of bytes, str, list, set, tuple -> type is {type(tag_data)}")
+
+
 class FLACFix:
     """Fixes some issues in FLAC files after importing with beets.
 
@@ -69,23 +104,9 @@ class FLACFix:
         musicbrainz_albumtype = self.flac.get('musicbrainz_albumtype')
         release_type = self.flac.get('releasetype')
         if musicbrainz_albumtype:
-            self.flac['musicbrainz_albumtype'] = self._list_to_string(musicbrainz_albumtype)
+            self.flac['musicbrainz_albumtype'] = _list_to_string(musicbrainz_albumtype)
         if release_type:
-            self.flac['releasetype'] = self._list_to_string(release_type)
-
-    @staticmethod
-    def _list_to_string(tag_data: Any) -> str:
-        """Converts a list, set, or tuple to a string
-
-        Args:
-            tag_data: list, set, or tuple to convert to string
-        """
-        if isinstance(tag_data, (bytes, str)):
-            return makestr(tag_data)
-        if isinstance(tag_data, (list, set, tuple)):
-            return ''.join(tag_data)
-
-        raise TypeError(f"data is not type of bytes, str, list, set, tuple -> type is {type(tag_data)}")
+            self.flac['releasetype'] = _list_to_string(release_type)
 
     def save(self) -> None:
         """Saves all edits to the FLAC data."""
@@ -117,10 +138,10 @@ def _mb_tags_from_flac(path: str, tag_data: FLAC) -> Tuple[str, str, str, str]:
     """
     LOGGER.debug("Retrieving MusicBrainz tags from %s", path)
 
-    release_group_id = str(tag_data.get(__FID_MB_RELEASE_GROUP_ID, ''))
-    artist_id = str(tag_data.get(__FID_MB_ALBUM_ID, ''))
-    album_type = str(tag_data.get(__FID_MB_ALBUM_TYPE, ''))
-    artist_credits = str(tag_data.get(__FID_MB_ARTIST_ID, ''))
+    release_group_id = _filter_attribute(tag_data.get(__FID_MB_RELEASE_GROUP_ID, ''))
+    artist_id = _filter_attribute(tag_data.get(__FID_MB_ALBUM_ID, ''))
+    album_type = _list_to_string(tag_data.get(__FID_MB_ALBUM_TYPE, ''))
+    artist_credits = _filter_attribute(tag_data.get(__FID_MB_ARTIST_ID, ''))
 
     return release_group_id, artist_id, album_type, artist_credits
 
@@ -138,9 +159,9 @@ def _release_date_from_flac(path: str, tag_data: FLAC) -> str:
     LOGGER.debug("Retrieving Date tags from %s", path)
 
     if __FID_DATE_ORIG_RELEASE in tag_data:
-        return str(tag_data[__FID_DATE_ORIG_RELEASE])
+        return _filter_attribute(tag_data[__FID_DATE_ORIG_RELEASE])
     if __FID_DATE_RELEASE in tag_data:
-        return str(tag_data[__FID_DATE_RELEASE])
+        return _filter_attribute(tag_data[__FID_DATE_RELEASE])
 
     return '0000-00-00'
 
@@ -159,12 +180,14 @@ def get_album_nfo(path: str) -> dict:
 
     publisher = ''
     if __FID_PUBLISHER in flac_data:
-        publisher = str(flac_data[__FID_PUBLISHER])
+        publisher = _filter_attribute(flac_data[__FID_PUBLISHER])
 
     release_group_id, artist_id, album_type, artist_credits = _mb_tags_from_flac(path, flac_data)
 
-    ret = album_nfo_base(str(flac_data[__FID_ALBUM_TITLE]), str(flac_data[__FID_ALBUM_ARTIST]),
-                         _release_date_from_flac(path, flac_data), publisher, mb_release_group=release_group_id,
-                         mb_artist_id=artist_id, mb_album_type=album_type, mb_artist_credits=artist_credits)
+    ret = album_nfo_base(_filter_attribute(flac_data[__FID_ALBUM_TITLE]),
+                         _filter_attribute(flac_data[__FID_ALBUM_ARTIST]),
+                         _release_date_from_flac(path, flac_data),
+                         publisher, mb_release_group=release_group_id, mb_artist_id=artist_id,
+                         mb_album_type=album_type, mb_artist_credits=artist_credits)
 
     return ret
