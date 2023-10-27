@@ -11,7 +11,7 @@ CMD_LINE_ARGS = [
     cli.Arg(['-b', '--beets-config'], {'dest': 'beets_config', 'metavar': 'path/to/beets/config.yaml',
                                        'help': 'Path to beets configuration file (if not in ${HOME}/.config/beets)'}),
     cli.Arg(['-d', '--directory'], {'dest': 'flac_directory', 'metavar': 'Artist', 'required': True,
-                                    'help': 'Path to artist directory containing MP3 files.'}),
+                                    'help': 'Path to artist directory containing FLAC files.'}),
     cli.Arg(['-i', '--ignore-folder'], {'dest': 'ignore_folder', 'action': 'store_true',
                                         'help': 'Ignore existence of folder.jpg'}),
     cli.Arg(['-l', '--log-file'], {'dest': 'log_file', 'metavar': 'file.log',

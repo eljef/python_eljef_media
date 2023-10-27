@@ -47,7 +47,7 @@ def _convert_and_resize(path: str, mid: str, target: str, max_height: int, encod
     LOGGER.debug("Converting '%s' to '%s'", path, mid)
     with Image.open(fr'{path}') as image_file:
         new_width, new_height = _calc_size(max_height, image_file.size[0], image_file.size[1])
-        with image_file.resize((new_width, new_height), Image.ANTIALIAS) as resized_image:
+        with image_file.resize((new_width, new_height), Image.LANCZOS) as resized_image:
             with resized_image.convert(encoding) as new_image:
                 new_image.save(fr'{mid}')
                 new_image.close()
