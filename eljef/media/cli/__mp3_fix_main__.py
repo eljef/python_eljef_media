@@ -8,9 +8,10 @@ import os
 
 from eljef.core import (applog, cli, fops)
 from eljef.media.__version__ import VERSION
+from eljef.media.cli.__common_audio__ import process_album_dir
 from eljef.media.cli.__mp3_fix_args__ import CMD_LINE_ARGS
 from eljef.media.cli.__mp3_fix_vars__ import (DESCRIPTION, NAME)
-from eljef.media.lib import (mp3, image)
+from eljef.media.lib import mp3
 from eljef.media.lib.cli import (ALBUM_NFO, album_dir_finish, check_media_dir, exit_with_error, get_media_dirs)
 
 # noinspection PyPackageRequirements
@@ -78,35 +79,19 @@ def _main_process_mp3_dir(base: str, path: str, image_height: int, target_volume
         ignore_folder (bool): Ignore the presence of folder.jpg
         tags_only (bool): Only correct tags on MP3 files
     """
-    full_path = os.path.join(base, path)
-    LOGGER.debug("Processing: %s", full_path)
+    f_data = process_album_dir(base, path, image_height, kwargs.get('ignore_folder', False), 'mp3')
+    if f_data.skip:
+        return
 
-    mp3_list = fops.list_files_by_extension(full_path, 'mp3')
-    nfo_data = mp3.album_nfo_from_mp3_file(os.path.join(full_path, mp3_list[0]))
-
-    LOGGER.info(" * %s", nfo_data.get('album').get('title'))
+    nfo_data = mp3.album_nfo_from_mp3_file(os.path.join(f_data.full_path, f_data.file_list[0]))
 
     if kwargs.get('tags_only'):
-        with fops.pushd(full_path):
-            _main_process_mp3_dir_mp3s_tags_only(mp3_list)
+        with fops.pushd(f_data.full_path):
+            _main_process_mp3_dir_mp3s_tags_only(f_data.file_list)
             return
 
-    folder_image = image.image_find(full_path, 'folder')
-
-    if folder_image and not kwargs.get('ignore_folder', False):
-        LOGGER.warning("   ** %s found: Skipping because already processed", folder_image)
-        return
-
-    cover_image = image.image_find(full_path, 'cover')
-    discart_image = image.image_find(full_path, 'discart')
-
-    if not cover_image:
-        LOGGER.error("   ** No cover image found: Skipping.")
-        return
-
-    with fops.pushd(full_path):
-        cover_image, discart_image = image.process_dir_images(cover_image, folder_image, discart_image, image_height)
-        _main_process_mp3_dir_mp3s(mp3_list, cover_image, target_volume, kwargs.get('debug'))
+    with fops.pushd(f_data.full_path):
+        _main_process_mp3_dir_mp3s(f_data.file_list, f_data.cover_image, target_volume, kwargs.get('debug'))
         album_dir_finish(ALBUM_NFO, nfo_data)
 
 
@@ -121,7 +106,7 @@ def main(**kwargs) -> None:
         tags_only (bool): Only correct the tags on MP3 files.
         target_volume (float): Target volume for mp3 files via mp3gain.
     """
-    _ = Gst.init(None)
+    Gst.init(None)
 
     directory = kwargs.get('directory')
     mp3dirs = get_media_dirs(directory, 'mp3', 'No MP3 files found')

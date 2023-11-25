@@ -12,8 +12,8 @@ from eljef.core import (applog, cli, fops)
 from eljef.media.__version__ import VERSION
 from eljef.media.cli.__beet_flac_args__ import CMD_LINE_ARGS
 from eljef.media.cli.__beet_flac_vars__ import (DESCRIPTION, NAME)
+from eljef.media.cli.__common_audio__ import process_album_dir
 from eljef.media.lib.cli import (ALBUM_NFO, album_dir_finish, check_media_dir, exit_with_error, get_media_dirs)
-from eljef.media.lib import image
 from eljef.media.lib.flac import (get_album_nfo, FLACFix)
 
 LOGGER = logging.getLogger()
@@ -66,9 +66,9 @@ def _process_flac_files(flac_list: list, cover_image: str, target_volume: float)
     """Process individual FLAC files
 
     Args:
-        flac_list: List of MP3 files to process
+        flac_list: List of FLAC files to process
         cover_image: Name of the image to use for the front cover.
-        target_volume: Volume, in decibels, mp3gain should adjust a track to.
+        target_volume: Volume, in decibels, to set reference volume to.
 
     Returns:
         A list of fixed flac objects
@@ -91,37 +91,21 @@ def _process_flac_dir(base: str, path: str, image_height: int, target_volume: fl
     """Main FLAC directory processing function.
 
     Args:
-        base: Base path holding directories of MP3s (Artist Directory)
-        path: Sub-directory holding MP3s (Album Directory)
+        base: Base path holding directories of FLACs (Artist Directory)
+        path: Sub-directory holding FLACs (Album Directory)
         image_height: The height that cover.jpg should be resized to.
-        target_volume: Volume, in decibels, mp3gain should adjust a track to.
+        target_volume: Volume, in decibels, to set reference volume to.
 
     Keyword Args:
+        debug (bool): Enable debug logging when True
         ignore_folder (bool): Ignore the presence of folder.jpg
     """
-    full_path = os.path.join(base, path)
-    LOGGER.debug("Processing: %s", full_path)
-
-    flac_list = sorted(fops.list_files_by_extension(full_path, 'flac'))
-
-    LOGGER.info(" * %s", path)
-
-    folder_image = image.image_find(full_path, 'folder')
-
-    if folder_image and not kwargs.get('ignore_folder', False):
-        LOGGER.warning("   ** %s found: Skipping because already processed", folder_image)
+    f_data = process_album_dir(base, path, image_height, kwargs.get('ignore_folder', False), 'flac')
+    if f_data.skip:
         return
 
-    cover_image = image.image_find(full_path, 'cover')
-    discart_image = image.image_find(full_path, 'discart')
-
-    if not cover_image:
-        LOGGER.error("   ** No cover image found: Skipping.")
-        return
-
-    with fops.pushd(full_path):
-        cover_image, discart_image = image.process_dir_images(cover_image, folder_image, discart_image, image_height)
-        fixed_flac_objs = _process_flac_files(flac_list, cover_image, target_volume)
+    with fops.pushd(f_data.full_path):
+        fixed_flac_objs = _process_flac_files(f_data.flac_list, f_data.cover_image, target_volume)
         nfo_data = get_album_nfo(fixed_flac_objs[0])
         album_dir_finish(ALBUM_NFO, nfo_data)
 
